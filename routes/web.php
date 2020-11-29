@@ -23,8 +23,6 @@ Auth::routes([
     'verify' => false, // Email Verification Routes...
 ]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/ordenes', [App\Http\Controllers\OrderController::class, 'listarOrdenes'])->middleware('auth')->name('home');
 
-Route::get('/ordenes', function () {
-    return view('ordenes');
-});
