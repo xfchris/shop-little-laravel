@@ -6,16 +6,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
 */
-
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Auth::routes([
     'register' => false, // Registration Routes...
@@ -23,8 +14,15 @@ Auth::routes([
     'verify' => false, // Email Verification Routes...
 ]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
+Route::get('/ordenes', [App\Http\Controllers\OrderController::class, 'listarOrdenes'])->middleware('auth')->name('home');
+#Route::get('/orden/{id}', [App\Http\Controllers\OrderController::class, 'mostrarOrden'])->name('mostrarOrden');
+Route::post('/json/buscar-orden', [App\Http\Controllers\OrderController::class, 'buscarOrden'])->name('buscarOrden');
+Route::post('/json/iniciar-pago', [App\Http\Controllers\OrderController::class, 'iniciarPago'])->name('iniciarPago');
 
-Route::get('/ordenes', function () {
-    return view('ordenes');
-});
+//Callback de PlaceToPay
+Route::get('/ptp/aceptar-pago/{id}', [App\Http\Controllers\OrderController::class, 'aceptarPago'])->name('aceptarPago');
+Route::get('/ptp/cancelar-pago/{id}', [App\Http\Controllers\OrderController::class, 'cancelarPago'])->name('cancelarPago');
+
+Route::get('/actualizar-ordenes', [App\Http\Controllers\OrderController::class, 'actualizarPagosPendientes'])->middleware('auth');
+
