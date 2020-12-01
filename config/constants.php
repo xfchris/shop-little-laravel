@@ -6,6 +6,7 @@ return [
         'PAYED' => 'Pagado',
         'REJECTED' => 'Rechazado',
         'PENDING' => 'Pendiente',
+        'APPROVED' => 'Pagado'
     ],
     'producto' => [
         'nombre' => 'Producto X',
@@ -14,6 +15,6 @@ return [
             'frenado automático de emergencia delantero y alerta de colisión frontal,' .
             'sensor punto ciego, Alerta de tráfico cruzado, luces altas automáticas y mucho más.',
         'moneda' => 'USD',
-        'precio' => 2000000
+        'precio' => 200
     ]
 ];
