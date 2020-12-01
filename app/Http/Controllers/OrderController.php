@@ -120,7 +120,7 @@ class OrderController extends Controller
             //busco la orden
             $order = Order::find($id);
             //si no esta en etado pagada, la busco en ptp
-            if ($order->status != 'PAYED') {
+            if ($order->status != Config('constants.status.PAYED')) {
                 $estado = $gstPlaceToPay->getStatusPago($id);
                 //si su estado esta aprobada, la apruebo en base de datos
                 if ($estado->isApproved()) {
@@ -148,7 +148,7 @@ class OrderController extends Controller
             //busco la orden
             $order = Order::find($id);
             //si esta en estado de creacion, la busco en ptp
-            if ($order->status == 'CREATED') {
+            if ($order->status == Config('constants.status.CREATED')) {
                 $estado = $gstPlaceToPay->getStatusPago($id);
                 //si no esta en estado rechazao, tampoco en aprobado
                 if (!$estado->isRejected() && !$estado->isApproved()) {
