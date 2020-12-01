@@ -20,6 +20,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
+
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-info shadow-sm">
             <div class="container">
@@ -73,6 +74,7 @@
                     </ul>
                 </div>
             </div>
+            <a href="#" class="d-none" target="_blank" id="linkOculto">L</a>
         </nav>
 
         <main class="py-4">
