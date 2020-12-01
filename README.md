@@ -2,8 +2,6 @@
 
 ### Pre-requisitos 📋
 
-_Ambiente requerido_
-
 - PHP >= 7.4 
 - sqlite 3
 - Composer versión 2. 
