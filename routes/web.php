@@ -24,4 +24,5 @@ Route::post('/json/iniciar-pago', [App\Http\Controllers\OrderController::class, 
 Route::get('/ptp/aceptar-pago/{id}', [App\Http\Controllers\OrderController::class, 'aceptarPago'])->name('aceptarPago');
 Route::get('/ptp/cancelar-pago/{id}', [App\Http\Controllers\OrderController::class, 'cancelarPago'])->name('cancelarPago');
 
+Route::get('/actualizar-ordenes', [App\Http\Controllers\OrderController::class, 'actualizarPagosPendientes'])->middleware('auth');
 

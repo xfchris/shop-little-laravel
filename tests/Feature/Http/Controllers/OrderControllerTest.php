@@ -144,7 +144,7 @@ class OrderControllerTest extends TestCase
         $payment = Payment::factory()->create();
         //el metodo getStatusPago me retorna que esta pendiente
         $this->gstPlaceToPay->method('getStatusPago')
-            ->willReturn($this->returnRedirectInformacion(Status::ST_PENDING)->status());
+            ->willReturn($this->returnRedirectInformacion(Status::ST_REJECTED)->status());
 
         $res = $this->ordenController->cancelarPago($this->gstPlaceToPay, $payment->order_id);
 

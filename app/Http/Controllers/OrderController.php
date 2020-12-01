@@ -118,24 +118,51 @@ class OrderController extends Controller
         $res = redirect('/');
         try {
             //busco la orden
-            $order = Order::find($id);
+            $order = Order::find(explode('_', $id)[0]);
             //si no esta en etado pagada, la busco en ptp
             if ($order->status != Config('constants.status.PAYED')) {
-                $estado = $gstPlaceToPay->getStatusPago($id);
+                $estado = $gstPlaceToPay->getStatusPago($order->payment->request_id);
+                $order->status = $estado->status();
                 //si su estado esta aprobada, la apruebo en base de datos
                 if ($estado->isApproved()) {
-                    $order->status = 'PAYED';
-                    $order->save();
                     $res = $res->with('success', 'Pago aprobado!');
+                }elseif($estado->isRejected()){
+                    $order->status = 'REJECTED';
+                    $res = $res->with('warning', 'Pago canelado!');
                 }
+                $order->save();
             }
         } catch (\Throwable $ex) {
             Log::error($ex->getMessage());
-            $res = $res->with('warning', 'Error desconocido!');
+            $res = $res->with('warning', 'Error desconocido');
         }
         return $res;
     }
 
+    /**
+     * Metodo que actualiza pagos que quedaron pendiente
+     * Nota: se puede optimizar añadiendo la consulta a unas variables y ejecutarlas
+     * todas en un solo query.
+     *
+     * @param GstPlaceToPay $gstPlaceToPay
+     * @throws \Exception
+     */
+    public function actualizarPagosPendientes(GstPlaceToPay $gstPlaceToPay){
+        //obtengo pagos pendientes
+        $ordenes = Order::where('status','PENDING')->get();
+
+        $estadosActualizados = [];
+        foreach ($ordenes as $orden) {
+            //realizo una consulta en ptp
+            $estado = $gstPlaceToPay->getStatusPago($orden->payment->request_id);
+            if ($orden->status != Config('constants.status.'.$estado->status())){
+                $orden->status = ($estado->status()!='APPROVED')?:'PAYED';
+                $orden->save();
+                $estadosActualizados[] = $orden->id;
+            }
+        }
+        return $estadosActualizados;
+    }
     /**
      * Realiza una consulta en placetopay y rechaza el pago de la orden
      *
@@ -146,12 +173,12 @@ class OrderController extends Controller
     {
         try {
             //busco la orden
-            $order = Order::find($id);
+            $order = Order::find(explode('_', $id)[0]);
             //si esta en estado de creacion, la busco en ptp
             if ($order->status == Config('constants.status.CREATED')) {
-                $estado = $gstPlaceToPay->getStatusPago($id);
-                //si no esta en estado rechazao, tampoco en aprobado
-                if (!$estado->isRejected() && !$estado->isApproved()) {
+                $estado = $gstPlaceToPay->getStatusPago($order->payment->request_id);
+                //si esta en estado rechazado, rechazar pago
+                if ($estado->isRejected()) {
                     $order->status = 'REJECTED';
                     $order->save();
                 }
@@ -159,7 +186,7 @@ class OrderController extends Controller
         } catch (\Throwable $ex) {
             Log::error($ex->getMessage());
         }
-        return redirect('/');
+        return redirect('/')->with('warning', 'Pago canelado!');;
     }
 
     /**
