@@ -12,14 +12,21 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
         try {
             //inicio el pago y obtiene url de redireccion
             let res = await realizarPago(formData)
-            console.log(res)
-            //redirecciona a placetopay
-            //muestra estado de solicitud
-            setInfoPago(res.data)
-            setVista('OrderEstado')
-
+            if (res.data.msg){
+                //muestra estado de solicitud
+                setInfoPago({
+                    'status':'Creada',
+                    'url':res.data.msg
+                })
+                setVista('OrderEstado')
+                //redirecciona a placetopay
+                abrirLink(res.data.msg, '_blank')
+            }
         } catch (error) {
-            Swal.fire("Se presentó un error desconocido.")
+            let msg = error?.response?.data?.msg
+            if (msg){
+                Swal.fire(msg)
+            }
         }
     }
     return (
@@ -46,3 +53,10 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
         </>
     )
 }
+
+function abrirLink(url, target){
+    const link = document.querySelector('#linkOculto')
+    link.href = url
+    link.click()
+}
+

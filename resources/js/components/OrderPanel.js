@@ -25,7 +25,7 @@ export default function OrderPanel() {
                             {
                                 {
                                     'OrderForm': <OrderForm formData={formData} setFormData={setFormData} setVista={setVista} setInfoPago={setInfoPago} />,
-                                    'OrderPreview': <OrderPreview formData={formData} setVista={setVista} />,
+                                    'OrderPreview': <OrderPreview formData={formData} setVista={setVista} setInfoPago={setInfoPago}/>,
                                     'OrderEstado': <OrderEstado formData={formData} setVista={setVista} infoPago={infoPago} />
                                 }[vista]
                             }

@@ -19,7 +19,10 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
             let res =  await buscarOrden(formData)
             respuestaConsultaOrden(res.data, setVista, setInfoPago)
         }catch(error) {
-            Swal.fire("Se presentó un error desconocido.")
+            let msg = error?.response?.data?.msg
+            if (msg){
+                Swal.fire(msg)
+            }
         }
     }
 

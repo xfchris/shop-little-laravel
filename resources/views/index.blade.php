@@ -4,9 +4,10 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            @if (session('status'))
+
+            @if (session('success') or session('status') or session('warning'))
                 <div class="alert alert-success" role="alert">
-                    {{ session('status') }}
+                    {{ session('status') }} {{ session('success') }} {{ session('warning') }}
                 </div>
             @endif
         </div>

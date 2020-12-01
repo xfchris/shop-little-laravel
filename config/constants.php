@@ -3,8 +3,9 @@
 return [
     'status' => [
         'CREATED' => 'Creado',
-        'CREATED2' => 'creado',
-        'CREATED3' => 'Rechazado',
+        'PAYED' => 'Pagado',
+        'REJECTED' => 'Rechazado',
+        'PENDING' => 'Pendiente',
     ],
     'producto' => [
         'nombre' => 'Producto X',

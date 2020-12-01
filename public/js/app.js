@@ -71272,10 +71272,14 @@ function OrderEstado(_ref) {
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     className: "mb-4"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("legend", null, "Estado de su orden"), "Su orden se encuentra en estado: ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, infoPago === null || infoPago === void 0 ? void 0 : infoPago.status)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("legend", null, "Estado de su orden"), "Su orden se encuentra en estado: ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, infoPago === null || infoPago === void 0 ? void 0 : infoPago.status)), infoPago !== null && infoPago !== void 0 && infoPago.url ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Si no se abri\xF3 la nueva pesta\xF1a, haz click abajo para continuar el pago ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+    href: infoPago.url,
+    target: "_blank",
+    className: "btn btn-info"
+  }, "Continuar pago")) : infoPago !== null && infoPago !== void 0 && infoPago.status && infoPago.status == 'REJECTED' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
     onClick: mostrarForm,
     className: "btn btn-info"
-  }, "Reintentar pago"));
+  }, "Reintentar pago") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null));
 }
 
 /***/ }),
@@ -71324,7 +71328,8 @@ function OrderForm(_ref) {
 
   var onSubmit = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(e) {
-      var res;
+      var res, _error$response, _error$response$data, msg;
+
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -71338,15 +71343,19 @@ function OrderForm(_ref) {
             case 5:
               res = _context.sent;
               respuestaConsultaOrden(res.data, setVista, setInfoPago);
-              _context.next = 12;
+              _context.next = 13;
               break;
 
             case 9:
               _context.prev = 9;
               _context.t0 = _context["catch"](2);
-              sweetalert2__WEBPACK_IMPORTED_MODULE_2___default.a.fire("Se presentó un error desconocido.");
+              msg = _context.t0 === null || _context.t0 === void 0 ? void 0 : (_error$response = _context.t0.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : _error$response$data.msg;
 
-            case 12:
+              if (msg) {
+                sweetalert2__WEBPACK_IMPORTED_MODULE_2___default.a.fire(msg);
+              }
+
+            case 13:
             case "end":
               return _context.stop();
           }
@@ -71552,7 +71561,8 @@ function OrderPanel() {
     }),
     'OrderPreview': /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_OrderPreview__WEBPACK_IMPORTED_MODULE_4__["default"], {
       formData: formData,
-      setVista: setVista
+      setVista: setVista,
+      setInfoPago: setInfoPago
     }),
     'OrderEstado': /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_OrderEstado__WEBPACK_IMPORTED_MODULE_5__["default"], {
       formData: formData,
@@ -71618,7 +71628,8 @@ function OrderPreview(_ref) {
 
   var pagar = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee() {
-      var res;
+      var res, _error$response, _error$response$data, msg;
+
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -71629,25 +71640,36 @@ function OrderPreview(_ref) {
 
             case 3:
               res = _context.sent;
-              console.log(res); //redirecciona a placetopay
-              //muestra estado de solicitud
 
-              setInfoPago(res.data);
-              setVista('OrderEstado');
-              _context.next = 12;
+              if (res.data.msg) {
+                //muestra estado de solicitud
+                setInfoPago({
+                  'status': 'Creada',
+                  'url': res.data.msg
+                });
+                setVista('OrderEstado'); //redirecciona a placetopay
+
+                abrirLink(res.data.msg, '_blank');
+              }
+
+              _context.next = 11;
               break;
 
-            case 9:
-              _context.prev = 9;
+            case 7:
+              _context.prev = 7;
               _context.t0 = _context["catch"](0);
-              sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.fire("Se presentó un error desconocido.");
+              msg = _context.t0 === null || _context.t0 === void 0 ? void 0 : (_error$response = _context.t0.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : _error$response$data.msg;
 
-            case 12:
+              if (msg) {
+                sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.fire(msg);
+              }
+
+            case 11:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[0, 9]]);
+      }, _callee, null, [[0, 7]]);
     }));
 
     return function pagar() {
@@ -71682,6 +71704,12 @@ function OrderPreview(_ref) {
     onClick: modificiarData,
     className: "btn btn-info"
   }, "Modificar informaci\xF3n")));
+}
+
+function abrirLink(url, target) {
+  var link = document.querySelector('#linkOculto');
+  link.href = url;
+  link.click();
 }
 
 /***/ }),

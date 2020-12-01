@@ -8,9 +8,9 @@ class GstPlaceToPay
 {
     public $placeToPay;
 
-    public function __construct()
+    public function __construct(PlacetoPay $placeToPay)
     {
-        $this->configInicial();
+        $this->placeToPay = $placeToPay;
     }
 
     /**
@@ -22,50 +22,48 @@ class GstPlaceToPay
      */
     public function pagar($order, $producto)
     {
-        $reference = $order->id;
+        $reference = $order->getReference();
         $request = [
             'payment' => [
                 'reference' => $reference,
-                'description' => $producto->nombre,
+                'description' => $producto['nombre'],
                 'amount' => [
-                    'currency' => $producto->moneda,
-                    'total' => $producto->precio,
+                    'currency' => $producto['moneda'],
+                    'total' => $producto['precio'],
                 ],
             ],
             'expiration' => date('c', strtotime('+2 days')),
-            'returnUrl' => route('aceptarPago') . $reference,
+            'returnUrl' => route('aceptarPago', ['id'=>$reference]),
+            'cancelUrl' => route('cancelarPago', ['id'=>$reference]),
             'ipAddress' => request()->ip(),
             'userAgent' => request()->header('user-agent'),
         ];
         $response = $this->placeToPay->request($request);
 
         if ($response->isSuccessful()) {
-            return $response->processUrl();
+            return $response;
         } else {
             throw new \Exception($response->status()->message());
         }
     }
 
-    public function getInfoPago()
-    {
-
-    }
-
     /**
-     * Configuración inicial
+     * Consulta en pasarela el estado actual de la transacción y lo devuelve
+     * como un objeto
      *
-     * @throws \Dnetix\Redirection\Exceptions\PlacetoPayException
+     * Ejemplo: Para saber si está aprobado: $obj->isApproved()
+     *
+     * @param $id
+     * @return mixed
+     * @throws \Exception
      */
-    public function configInicial(){
-        $placetopay = new PlacetoPay([
-            'login' => env('PLACE_TO_PAY_LOGIN'),
-            'tranKey' => env('PLACE_TO_PAY_TRANKEY'),
-            'url' => env('PLACE_TO_PAY_URL'),
-            'rest' => [
-                'timeout' => 45, // (optional) 15 by default
-                'connect_timeout' => 30, // (optional) 5 by default
-            ]
-        ]);
-        $this->placeToPay = $placetopay;
+    public function getStatusPago($id)
+    {
+        $response = $this->placeToPay->query($id);
+        if ($response->isSuccessful()) {
+            return $response->status();
+        } else {
+            throw new \Exception($response->status()->message());
+        }
     }
 }

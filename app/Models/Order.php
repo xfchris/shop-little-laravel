@@ -20,10 +20,28 @@ class Order extends Model
     public function getStatusAttribute()
     {
        $estado = $this->attributes['status'];
-        return Config::get('constants.'.$estado);
+       $res = Config::get('constants.status.'.$estado);
+        return $res?:$estado;
     }
 
     public function store($data){
-        $this->fill($data)->save();
+        return $this->fill($data)->save();
+    }
+
+    public function getReference(){
+        return $this->id.'_'.$this->created_at->timestamp;
+    }
+
+    public function guardarSesion($orderId, $resPTP){
+        $data = [
+            'order_id'=>$orderId,
+            'request_id'=>$resPTP[0],
+            'process_url'=>$resPTP[1],
+        ];
+        return $this->payment()->create($data);
+    }
+
+    public function payment(){
+        return $this->hasOne('App\Models\Payment');
     }
 }
