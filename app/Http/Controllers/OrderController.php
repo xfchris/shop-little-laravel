@@ -31,7 +31,7 @@ class OrderController extends Controller
     public function buscarOrden(OrdenRequest $request, Order $order, GstPlaceToPay $gstPlaceToPay)
     {
         //Busca una orden de pago activa, si la encuentra, la retorna con su url
-        $funcSuccess = function () use ($request, $order, $gstPlaceToPay) {
+        try{
             $res = $order->where($request->all())->whereIn('status', ['CREATED', 'PENDING'])->first();
             //Compruebo si ha cambiado su estado en ptp
             if ($res) {
@@ -44,10 +44,11 @@ class OrderController extends Controller
                     $res = null;
                 }
             }
-            return [$res, 200];
-        };
-
-        return Helpers::ViewJSONResponse($funcSuccess);
+            $response = Helpers::ViewAPIResponse($res);
+        } catch (\Throwable $ex) {
+            $response = Helpers::ViewAPIResponse($res, $ex);
+        }
+        return $response;
     }
 
     /**
@@ -59,17 +60,12 @@ class OrderController extends Controller
      */
     public function iniciarPago(OrdenRequest $request, Order $order, GstPlaceToPay $gstPlaceToPay)
     {
-        /**
-         * Crea orden de pago y devuelve la url
-         * @return array
-         */
-        $funcSuccess = function () use ($request, $order, $gstPlaceToPay) {
-            DB::beginTransaction();
+        try{
             $data = $request->all();
             $ordenEncontrada = $order->where($data)->whereIn('status', ['CREATED', 'PENDING'])->first();
+            DB::beginTransaction();
 
             // Si encuentra la orden con los mismos datos e iniciada, genera una excepcion
-            // porque no debe de existir
             throw_if($ordenEncontrada, OrderFoundException::class);
 
             $data['status'] = 'CREATED';
@@ -81,16 +77,12 @@ class OrderController extends Controller
                     DB::commit();
                 }
             }
-            return [$res, 200];
-        };
-
-        /**
-         * Si se presenta una excepcion en la funcion $funcSuccess, ejecuta rollback
-         */
-        $funcError = function () {
+            $response = Helpers::ViewAPIResponse($res);
+        } catch (\Throwable $ex) {
             DB::rollBack();
-        };
-        return Helpers::ViewJSONResponse($funcSuccess, $funcError);
+            $response = Helpers::ViewAPIResponse(null, $ex->getCode(), $ex);
+        }
+        return $response;
     }
 
     /**

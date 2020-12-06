@@ -17,7 +17,7 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
 
         try{
             let res =  await buscarOrden(formData)
-            respuestaConsultaOrden(res.data, setVista, setInfoPago)
+            respuestaConsultaOrden(res.data?.data, setVista, setInfoPago)
         }catch(error) {
             let msg = error?.response?.data?.msg
             if (msg){
@@ -76,7 +76,7 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
  * @param setInfoPago
  */
 function respuestaConsultaOrden(datos, setVista, setInfoPago){
-    if ((datos?.data)) {
+    if ((datos)) {
         Swal.fire({
             title: 'Ya existe un pago en proceso con los datos ingresados',
             html:'¿Que desea hacer?',

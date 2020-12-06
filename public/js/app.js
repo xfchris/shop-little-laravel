@@ -71323,7 +71323,7 @@ function OrderForm(_ref) {
 
   var onSubmit = /*#__PURE__*/function () {
     var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(e) {
-      var res, _error$response, _error$response$data, msg;
+      var _res$data, res, _error$response, _error$response$data, msg;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
         while (1) {
@@ -71337,7 +71337,7 @@ function OrderForm(_ref) {
 
             case 5:
               res = _context.sent;
-              respuestaConsultaOrden(res.data, setVista, setInfoPago);
+              respuestaConsultaOrden((_res$data = res.data) === null || _res$data === void 0 ? void 0 : _res$data.data, setVista, setInfoPago);
               _context.next = 13;
               break;
 
@@ -71416,7 +71416,7 @@ function OrderForm(_ref) {
  */
 
 function respuestaConsultaOrden(datos, setVista, setInfoPago) {
-  if (datos !== null && datos !== void 0 && datos.data) {
+  if (datos) {
     sweetalert2__WEBPACK_IMPORTED_MODULE_2___default.a.fire({
       title: 'Ya existe un pago en proceso con los datos ingresados',
       html: '¿Que desea hacer?',
@@ -71644,7 +71644,7 @@ function OrderPreview(_ref) {
             case 3:
               res = _context.sent;
 
-              if ((_res$data = res.data) !== null && _res$data !== void 0 && (_res$data$data = _res$data.data) !== null && _res$data$data !== void 0 && _res$data$data.msg) {
+              if ((_res$data = res.data) !== null && _res$data !== void 0 && (_res$data$data = _res$data.data) !== null && _res$data$data !== void 0 && _res$data$data.url) {
                 //muestra estado de solicitud
                 setInfoPago({
                   'status': 'Creada',
@@ -71661,7 +71661,7 @@ function OrderPreview(_ref) {
             case 7:
               _context.prev = 7;
               _context.t0 = _context["catch"](0);
-              msg = _context.t0 === null || _context.t0 === void 0 ? void 0 : (_error$response = _context.t0.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : (_error$response$data$ = _error$response$data.data) === null || _error$response$data$ === void 0 ? void 0 : _error$response$data$.msg;
+              msg = _context.t0 === null || _context.t0 === void 0 ? void 0 : (_error$response = _context.t0.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : (_error$response$data$ = _error$response$data.errors) === null || _error$response$data$ === void 0 ? void 0 : _error$response$data$.msg;
 
               if (msg) {
                 sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.fire(msg);

@@ -12,7 +12,7 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
         try {
             //inicio el pago y obtiene url de redireccion
             let res = await realizarPago(formData)
-            if (res.data?.data?.msg){
+            if (res.data?.data?.url){
                 //muestra estado de solicitud
                 setInfoPago({
                     'status':'Creada',
@@ -23,7 +23,7 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
                 abrirLink(res.data.data.url, '_blank')
             }
         } catch (error) {
-            let msg = error?.response?.data?.data?.msg
+            let msg = error?.response?.data?.errors?.msg
             if (msg){
                 Swal.fire(msg)
             }

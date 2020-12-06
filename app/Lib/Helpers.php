@@ -13,7 +13,8 @@ class Helpers
      * @param string $formato
      * @return string
      */
-    public static function dateFormat($valor, $formato='d/m/Y h:i A'){
+    public static function dateFormat($valor, $formato = 'd/m/Y h:i A')
+    {
         return \Carbon\Carbon::parse($valor)->format($formato);
     }
 
@@ -24,11 +25,11 @@ class Helpers
      * @param string $status
      * @return array
      */
-    public static function APIResponse($data, $status='success')
+    public static function APIResponse($data, $status = 'success')
     {
         return [
             'status' => $status,
-            ($status=='success')?'data':'errors' => $data
+            ($status == 'success') ? 'data' : 'errors' => $data
         ];
     }
 
@@ -36,30 +37,23 @@ class Helpers
      * Retorna una vista en JSON de todas las repuestas teniendo en cuenta
      * el control de errores
      *
-     * @param $funcSuccess
-     * @param null $funcError
+     * @param $res
+     * @param int $code
+     * @param \Throwable|null $objError
      * @return \Illuminate\Http\JsonResponse
      */
-    public static function ViewJSONResponse($funcSuccess, $funcError = null){
-        //Si se presenta un error de validacion, lo manda por excepcion
-        try {
-            list ($res, $code) = $funcSuccess();
+    public static function ViewAPIResponse($res, $code = 200, \Throwable $objError = null)
+    {
+        if (!$objError) {
             $res = self::APIResponse($res);
-
-        } catch (\Throwable $ex) {
-            //si tiene funcion de error, la ejecuta
-            if ($funcError){
-                $funcError();
-            }
-            $code = $ex->getCode();
-            $msg = $ex->getMessage();
-            if ($code >= 400 && $code <=499) {
-                $res = self::APIResponse($msg, 'error');
-            }else{
+        } else {
+            $msg = $objError->getMessage();
+            if (!($code >= 400 && $code <= 499)) {
+                $code = 500;
                 Log::error($msg);
                 $msg = "Error desconocido";
-                $res = self::APIResponse($msg, 'error');
             }
+            $res = self::APIResponse($msg, 'error');
         }
         return response()->json($res, $code);
     }
