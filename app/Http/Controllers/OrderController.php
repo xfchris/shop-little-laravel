@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\OrderFoundException;
+use App\Http\Requests\OrdenRequest;
 use App\Lib\GstPlaceToPay;
+use App\Lib\Helpers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-
     /**
      * Lista las ordenes de la aplicacion
-     *
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function listarOrdenes()
     {
@@ -24,86 +23,74 @@ class OrderController extends Controller
     }
 
     /**
-     * Busca una orden con los datos del formulario
+     * API: Busca una orden con los datos del formulario
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function buscarOrden(Request $request, Order $order, GstPlaceToPay $gstPlaceToPay)
+    public function buscarOrden(OrdenRequest $request, Order $order, GstPlaceToPay $gstPlaceToPay)
     {
-        //Si se presenta un error de validacion, lo manda por excepcion
-        try {
-            $code = 200;
-            $data = $this->prepararYValidarDatos($request);
-
+        //Busca una orden de pago activa, si la encuentra, la retorna con su url
+        $funcSuccess = function () use ($request, $order, $gstPlaceToPay) {
+            $res = $order->where($request->all())->whereIn('status', ['CREATED', 'PENDING'])->first();
             //Compruebo si ha cambiado su estado en ptp
-            if ($res = $order->where($data)->where('status', 'CREATED')->first()) {
+            if ($res) {
                 $estado = $gstPlaceToPay->getStatusPago($res->payment->request_id);
-
                 $res->status = $estado->status();
+
                 //si ha cambiado de estado, lo cambio en base de datos
                 if ($res->status == 'REJECTED') {
                     $res->save();
                     $res = null;
-                }else{
-                    $res['url'] = $res->payment->process_url;
                 }
             }
+            return [$res, 200];
+        };
 
-        } catch (\Throwable $ex) {
-            $msg = $ex->getMessage();
-            $code = $ex->getCode();
-            //Si no es un error de validacion, lo registra y reporta como error 500
-            if ($code != 400) {
-                $code = 500;
-                Log::error($msg);
-                $msg = "Error desconocido";
-            }
-            $res = ['error' => $msg];
-        }
-        return response()->json($res, $code);
+        return Helpers::ViewJSONResponse($funcSuccess);
     }
 
     /**
-     * Guarda la orden e inicia el pago en la pasarela
+     * API: Guarda la orden e inicia el pago en la pasarela
      *
      * @param Request $request
      * @param Order $order
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function iniciarPago(Request $request, Order $order, GstPlaceToPay $gstPlaceToPay)
+    public function iniciarPago(OrdenRequest $request, Order $order, GstPlaceToPay $gstPlaceToPay)
     {
-        try {
-            $code = 200;
-            $data = $this->prepararYValidarDatos($request);
-            $ordenEncontrada = $order->where($data)->where('status', 'CREATED')->first();
+        /**
+         * Crea orden de pago y devuelve la url
+         * @return array
+         */
+        $funcSuccess = function () use ($request, $order, $gstPlaceToPay) {
+            DB::beginTransaction();
+            $data = $request->all();
+            $ordenEncontrada = $order->where($data)->whereIn('status', ['CREATED', 'PENDING'])->first();
 
-            if (!$ordenEncontrada) {
-                DB::beginTransaction();
-                $data['status'] = 'CREATED';
-                if ($order->store($data)) {
-                    $resPTP = $gstPlaceToPay->pagar($order, Config('constants.producto'));
-                    //guardo sesion y la url de pago
-                    if ($order->guardarSesion($order->id, [$resPTP->requestId, $resPTP->processUrl])) {
-                        $res = ['status' => 'ok', 'msg' => $resPTP->processUrl];
-                        DB::commit();
-                    }
+            // Si encuentra la orden con los mismos datos e iniciada, genera una excepcion
+            // porque no debe de existir
+            throw_if($ordenEncontrada, OrderFoundException::class);
+
+            $data['status'] = 'CREATED';
+            if ($order->store($data)) {
+                $resPTP = $gstPlaceToPay->pagar($order, Config('constants.producto'));
+                //guardo sesion y la url de pago
+                if ($order->guardarSesion($order->id, [$resPTP->requestId, $resPTP->processUrl])) {
+                    $res = ['url' => $resPTP->processUrl];
+                    DB::commit();
                 }
-            } else {
-                throw new \Exception("Ya existe un registro en base de datos con los datos de esta orden", 400);
             }
-        } catch (\Throwable $ex) {
+            return [$res, 200];
+        };
+
+        /**
+         * Si se presenta una excepcion en la funcion $funcSuccess, ejecuta rollback
+         */
+        $funcError = function () {
             DB::rollBack();
-            $msg = $ex->getMessage();
-            $code = $ex->getCode();
-            //Si no es un error de validacion, lo registra y reporta como error 500
-            if ($code != 400) {
-                $code = 500;
-                Log::error($msg);
-                $msg = "Error desconocido intentelo de nuevo";
-            }
-            $res = ['status' => 'error', 'msg' => $msg];
-        }
-        return response()->json($res, $code);
+        };
+        return Helpers::ViewJSONResponse($funcSuccess, $funcError);
     }
 
     /**
@@ -125,8 +112,9 @@ class OrderController extends Controller
                 $order->status = $estado->status();
                 //si su estado esta aprobada, la apruebo en base de datos
                 if ($estado->isApproved()) {
+                    $order->status = 'PAYED';
                     $res = $res->with('success', 'Pago aprobado!');
-                }elseif($estado->isRejected()){
+                } elseif ($estado->isRejected()) {
                     $order->status = 'REJECTED';
                     $res = $res->with('warning', 'Pago canelado!');
                 }
@@ -147,22 +135,24 @@ class OrderController extends Controller
      * @param GstPlaceToPay $gstPlaceToPay
      * @throws \Exception
      */
-    public function actualizarPagosPendientes(GstPlaceToPay $gstPlaceToPay){
-        //obtengo pagos pendientes
-        $ordenes = Order::where('status','PENDING')->get();
+    public function actualizarPagosPendientes(GstPlaceToPay $gstPlaceToPay)
+    {
+        //obtengo pagos en estado pendiente y/o vencidos
+        $ordenes = Order::where('status', 'PENDING')->get();
 
         $estadosActualizados = [];
         foreach ($ordenes as $orden) {
             //realizo una consulta en ptp
             $estado = $gstPlaceToPay->getStatusPago($orden->payment->request_id);
-            if ($orden->status != Config('constants.status.'.$estado->status())){
-                $orden->status = ($estado->status()!='APPROVED')?:'PAYED';
+            if ($orden->status != Config('constants.status.' . $estado->status())) {
+                $orden->status = ($estado->status() != 'APPROVED') ?: 'PAYED';
                 $orden->save();
                 $estadosActualizados[] = $orden->id;
             }
         }
         return $estadosActualizados;
     }
+
     /**
      * Realiza una consulta en placetopay y rechaza el pago de la orden
      *
@@ -186,33 +176,6 @@ class OrderController extends Controller
         } catch (\Throwable $ex) {
             Log::error($ex->getMessage());
         }
-        return redirect('/')->with('warning', 'Pago canelado!');;
-    }
-
-    /**
-     * Organiza y valida los datos del post de inciarPago y buscarOrden
-     *
-     * @param $request
-     * @return array
-     * @throws \Exception
-     */
-    private function prepararYValidarDatos($request)
-    {
-        $data = [
-            'customer_name' => $request->nombres,
-            'customer_email' => $request->email,
-            'customer_mobile' => $request->telefono,
-        ];
-        $rules = [
-            'customer_name' => 'required|max:80',
-            'customer_email' => 'required|email|max:120',
-            'customer_mobile' => 'required|max:40',
-        ];
-        $valid = Validator::make($data, $rules);
-        if ($valid->fails()) {
-            $errores = $valid->errors()->all();
-            throw new \Exception(implode(', ', $errores), 400);
-        }
-        return $data;
+        return redirect('/')->with('warning', 'Pago canelado!');
     }
 }

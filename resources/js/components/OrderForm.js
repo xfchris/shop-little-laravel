@@ -33,32 +33,32 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
                     <legend>Nueva orden de pago</legend>
 
                     <div className="form-group">
-                        <label htmlFor="nombres">Nombres y apellidos</label>
+                        <label htmlFor="customer_name">Nombres y apellidos</label>
                         <input type="text"
                                className="form-control"
-                               name="nombres"
+                               name="customer_name"
                                maxLength='80'
-                               defaultValue={formData.nombres}
+                               defaultValue={formData.customer_name}
                                placeholder="Ejemplo: Juan Perez" required/>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Correo electrónico</label>
+                        <label htmlFor="customer_email">Correo electrónico</label>
                         <input type="email"
                                className="form-control"
-                               name="email"
+                               name="customer_email"
                                maxLength='120'
-                               defaultValue={formData.email}
+                               defaultValue={formData.customer_email}
                                placeholder="Ejemplo: juan23perez@gmail.com" required/>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="telefono">Número telefónico</label>
+                        <label htmlFor="customer_mobile">Número telefónico</label>
                         <input type="text"
                                className="form-control"
-                               name="telefono"
+                               name="customer_mobile"
                                maxLength='40'
-                               defaultValue={formData.telefono}
+                               defaultValue={formData.customer_mobile}
                                placeholder="Escribe aquí tu numero de teléfono o celular" required/>
                     </div>
 
@@ -76,7 +76,7 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
  * @param setInfoPago
  */
 function respuestaConsultaOrden(datos, setVista, setInfoPago){
-    if ((datos?.status)) {
+    if ((datos?.data)) {
         Swal.fire({
             title: 'Ya existe un pago en proceso con los datos ingresados',
             html:'¿Que desea hacer?',

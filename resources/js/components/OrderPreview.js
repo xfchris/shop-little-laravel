@@ -1,5 +1,5 @@
 import React from 'react'
-import {buscarOrden, realizarPago} from "../api/Orden";
+import {realizarPago} from "../api/Orden";
 import Swal from "sweetalert2";
 
 export default function OrderPreview({formData, setVista, setInfoPago}) {
@@ -12,18 +12,18 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
         try {
             //inicio el pago y obtiene url de redireccion
             let res = await realizarPago(formData)
-            if (res.data.msg){
+            if (res.data?.data?.msg){
                 //muestra estado de solicitud
                 setInfoPago({
                     'status':'Creada',
-                    'url':res.data.msg
+                    'url':res.data.data.url
                 })
                 setVista('OrderEstado')
                 //redirecciona a placetopay
-                abrirLink(res.data.msg, '_blank')
+                abrirLink(res.data.data.url, '_blank')
             }
         } catch (error) {
-            let msg = error?.response?.data?.msg
+            let msg = error?.response?.data?.data?.msg
             if (msg){
                 Swal.fire(msg)
             }
@@ -35,15 +35,15 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
 
             <div className="mb-2 row">
                 <div className="col-sm-3">Nombre completo:</div>
-                <div className="col-sm-9 ml-0">{formData.nombres}</div>
+                <div className="col-sm-9 ml-0">{formData.customer_name}</div>
             </div>
             <div className="mb-2 row">
                 <div className="col-sm-3">Email:</div>
-                <div className="col-sm-9 ml-0">{formData.email}</div>
+                <div className="col-sm-9 ml-0">{formData.customer_email}</div>
             </div>
             <div className="mb-2 row">
                 <div className="col-sm-3">Teléfono:</div>
-                <div className="col-sm-9 ml-0">{formData.telefono}</div>
+                <div className="col-sm-9 ml-0">{formData.customer_mobile}</div>
             </div>
 
             <div className="mt-4">
@@ -54,6 +54,12 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
     )
 }
 
+/**
+ * Permite abrir en otra pestaña evitando que el navegador bloquee
+ *
+ * @param url
+ * @param target
+ */
 function abrirLink(url, target){
     const link = document.querySelector('#linkOculto')
     link.href = url

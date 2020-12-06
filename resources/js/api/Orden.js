@@ -1,9 +1,5 @@
 import axios from "axios";
 
-function getProducto(){
-    return JSON.parse(document.querySelector('#dataBase').getAttribute('data-producto'))
-}
-
 export function buscarOrden(data){
     try{
         return axios.post('/json/buscar-orden', data)

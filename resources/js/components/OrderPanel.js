@@ -38,19 +38,26 @@ export default function OrderPanel() {
     );
 }
 
-if (document.getElementById('orderPanel')) {
-    ReactDOM.render(<OrderPanel />, document.getElementById('orderPanel'));
-}
-
+/**
+ * Retorna un objeto inicial para el usuario
+ *
+ * @returns {{customer_mobile: string, customer_email: string, customer_name: string}}
+ */
 function initialFDState() {
     return {
-        nombres: "Un dato predeterminado",
-        email: "algo@hotmail.com",
-        telefono: "3334445999"
+        customer_name: "Juan Perez",
+        customer_email: "juan_perez@hotmail.com",
+        customer_mobile: "3334445999"
     }
 }
 
-//Obtengo el producto desde el backend
+/**
+ * Obtengo el producto desde el backend
+ */
 function getProducto(){
     return JSON.parse(document.querySelector('#dataBase').getAttribute('data-producto'))
+}
+
+if (document.getElementById('orderPanel')) {
+    ReactDOM.render(<OrderPanel />, document.getElementById('orderPanel'));
 }
