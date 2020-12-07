@@ -16,5 +16,6 @@ return [
             'sensor punto ciego, Alerta de tráfico cruzado, luces altas automáticas y mucho más.',
         'moneda' => 'USD',
         'precio' => 200
-    ]
+    ],
+    'dias_expiracion' => 1
 ];

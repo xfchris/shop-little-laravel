@@ -13,7 +13,7 @@
         </div>
     </div>
 
-    <div id="orderPanel"></div>
+    <div id="orderPanel" data-vista="OrderForm"></div>
     <div id="dataBase" data-producto="{{json_encode($producto)}}"></div>
 </div>
 @endsection

@@ -11,6 +11,7 @@
                 @endif
             </div>
         </div>
-        <div id="orderEstado"></div>
+        <div id="orderPanel" data-vista="OrderEstado" data-orden="{{json_encode($orden)}}"></div>
+        <div id="dataBase" data-producto="{{json_encode($producto)}}"></div>
     </div>
 @endsection

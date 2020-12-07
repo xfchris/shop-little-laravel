@@ -8,9 +8,9 @@ import OrderEstado from "./OrderEstado";
 export default function OrderPanel() {
 
     const producto = getProducto();
-    const [infoPago, setInfoPago] = useState({})
+    const [infoPago, setInfoPago] = useState(initialInfoPago)
     const [formData, setFormData] = useState(initialFDState)
-    const [vista, setVista] = useState('OrderForm')
+    const [vista, setVista] = useState(initialVista)
 
 
     return (
@@ -38,19 +38,39 @@ export default function OrderPanel() {
     );
 }
 
-if (document.getElementById('orderPanel')) {
-    ReactDOM.render(<OrderPanel />, document.getElementById('orderPanel'));
-}
-
-function initialFDState() {
-    return {
-        nombres: "Un dato predeterminado",
-        email: "algo@hotmail.com",
-        telefono: "3334445999"
+function initialInfoPago(){
+    let orden = document.querySelector('#orderPanel').getAttribute('data-orden')
+    if (orden){
+        return JSON.parse(orden)
     }
+    return {}
 }
 
-//Obtengo el producto desde el backend
+/**
+ * Retorna un objeto inicial para el usuario
+ */
+function initialFDState() {
+    let orden = document.querySelector('#orderPanel').getAttribute('data-orden')
+    if (orden){
+        return JSON.parse(orden)
+    }
+    return {}
+}
+
+/**
+ * Retorna el panel inicial
+ */
+function initialVista(){
+    return document.querySelector('#orderPanel').getAttribute('data-vista')
+}
+
+/**
+ * Obtengo el producto desde el backend
+ */
 function getProducto(){
     return JSON.parse(document.querySelector('#dataBase').getAttribute('data-producto'))
+}
+
+if (document.getElementById('orderPanel')) {
+    ReactDOM.render(<OrderPanel />, document.getElementById('orderPanel'));
 }

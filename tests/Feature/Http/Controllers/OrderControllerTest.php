@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers;
 
 use App\Http\Controllers\OrderController;
+use App\Http\Requests\OrdenRequest;
 use App\Lib\GstPlaceToPay;
 use App\Models\Order;
 use App\Models\Payment;
@@ -62,12 +63,12 @@ class OrderControllerTest extends TestCase
     public function en_buscar_orden_comprobar_error_al_mandar_datos_incorrectos()
     {
         $data = [
-            'nombres' => 'Christian Valencia',
-            'email' => 'emailIncorrecto',
-            'telefono' => '333222'
+            'customer_nombre' => 'Christian Valencia',
+            'customer_email' => 'emailIncorrecto',
+            'customer_mobile' => '333222'
         ];
         $res = $this->post(route('buscarOrden'), $data);
-        $res->assertStatus(400);
+        $res->assertStatus(422);
         $res->assertSee('error');
     }
 
@@ -81,12 +82,12 @@ class OrderControllerTest extends TestCase
     public function en_iniciar_pago_comprobar_error_al_mandar_datos_incorrectos()
     {
         $data = [
-            'nombres' => 'Christian Valencia',
-            'email' => 'emailIncorrecto',
-            'telefono' => '333222'
+            'customer_name' => 'Christian Valencia',
+            'customer_email' => 'emailIncorrecto',
+            'customer_mobile' => '333222'
         ];
         $res = $this->post(route('iniciarPago'), $data);
-        $res->assertStatus(400);
+        $res->assertStatus(422);
         $res->assertSee('error');
     }
 
@@ -101,9 +102,9 @@ class OrderControllerTest extends TestCase
     {
         $payment = Payment::factory()->create();
         $data = [
-            'nombres' => $payment->order->customer_name,
-            'email' => $payment->order->customer_email,
-            'telefono' => $payment->order->customer_mobile,
+            'customer_name' => $payment->order->customer_name,
+            'customer_email' => $payment->order->customer_email,
+            'customer_mobile' => $payment->order->customer_mobile,
         ];
         $res = $this->post(route('iniciarPago'), $data);
         $res->assertStatus(400);
@@ -127,7 +128,7 @@ class OrderControllerTest extends TestCase
         $res = $this->ordenController->aceptarPago($this->gstPlaceToPay, $payment->order_id);
 
         //compruebo que haya cambiado en base de datos el estado del pago
-        $this->assertSame($payment->order->status, Config('constants.status.PAYED'));
+        $this->assertSame($payment->order->status, config('constants.status.PAYED'));
         //compruebo que redirecciona
         $this->assertSame($res->status(), 302);
     }
@@ -149,7 +150,7 @@ class OrderControllerTest extends TestCase
         $res = $this->ordenController->cancelarPago($this->gstPlaceToPay, $payment->order_id);
 
         //compruebo que haya cambiado en base de datos el estado del pago
-        $this->assertSame($payment->order->status, Config('constants.status.REJECTED'));
+        $this->assertSame($payment->order->status, config('constants.status.REJECTED'));
         //compruebo que redirecciona
         $this->assertSame($res->status(), 302);
     }
@@ -166,16 +167,17 @@ class OrderControllerTest extends TestCase
         $payment = Payment::factory()->create();
 
         //Creo request
-        $request = $this->createRequest();
-        $request->nombres = $payment->order->customer_name;
-        $request->email = $payment->order->customer_email;
-        $request->telefono = $payment->order->customer_mobile;
-
+        $data = [
+            'customer_name' => $payment->order->customer_name,
+            'customer_email' => $payment->order->customer_email,
+            'customer_mobile' => $payment->order->customer_mobile
+        ];
+        //Creo request
+        $request = $this->createRequest(route('buscarOrden'), $data);
         //Busco  orden
         $res = $this->ordenController->buscarOrden($request, $payment->order, $this->gstPlaceToPay);
-
         //Compruebo que retorna la orden
-        $this->assertSame($payment->process_url, $res->getData()->url);
+        $this->assertSame($payment->process_url, $res->getData()->data->payment->process_url);
     }
 
     /**
@@ -183,20 +185,19 @@ class OrderControllerTest extends TestCase
      */
     public function en_inciar_pago_comprobar_que_inicia_el_pago_al_tener_datos_correctos()
     {
-        $this->gstPlaceToPay->method('pagar')
-            ->willReturn($this->returnRedirectResponse());
-
+        $this->gstPlaceToPay->method('pagar')->willReturn($this->returnRedirectResponse());
+        $data = [
+            'customer_name' => 'Jhon Perez',
+            'customer_email' => 'test@test.com',
+            'customer_mobile' => '333222'
+        ];
         //Creo request
-        $request = $this->createRequest();
-        $request->nombres = 'Test de orden que no existe';
-        $request->email = 'test@test.com';
-        $request->telefono = '33344567';
-
+        $request = $this->createRequest(route('iniciarPago'), $data);
         //Inciar pago
         $res = $this->ordenController->iniciarPago($request, new Order(), $this->gstPlaceToPay);
 
         //Compruebo el pago iniciado en base de datos
-        $pago = Payment::where('process_url', $res->getData()->msg)->first();
+        $pago = Payment::where('process_url', $res->getData()->data->url)->first();
         $this->assertNotNull($pago);
     }
 
@@ -229,10 +230,10 @@ class OrderControllerTest extends TestCase
     /**
      * Crea una peticion
      *
-     * @return Request
+     * @return OrdenRequest
      */
-    private function createRequest()
+    private function createRequest($route, $data)
     {
-        return new Request();
+        return OrdenRequest::create($route,'POST', $data);
     }
 }

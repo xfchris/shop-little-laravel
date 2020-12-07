@@ -1,8 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Swal from 'sweetalert2'
 import {buscarOrden} from "../api/Orden";
 
 export default function OrderForm({formData, setFormData, setVista, setInfoPago}) {
+
+    const [btns, setBtns] = useState({name: 'Continuar', disabled: ''})
 
     const onChange = (e) => {
         setFormData({
@@ -15,12 +17,15 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
         e.target.checkValidity();
         e.preventDefault();
 
-        try{
-            let res =  await buscarOrden(formData)
-            respuestaConsultaOrden(res.data, setVista, setInfoPago)
-        }catch(error) {
+        try {
+            setBtns({name: 'Espere...', disabled: 'disabled'})
+            let res = await buscarOrden(formData)
+            setBtns({name: 'Continuar', disabled: ''})
+            respuestaConsultaOrden(res.data?.data, setVista, setInfoPago)
+        } catch (error) {
+            setBtns({name: 'Espere...', disabled: 'disabled'})
             let msg = error?.response?.data?.msg
-            if (msg){
+            if (msg) {
                 Swal.fire(msg)
             }
         }
@@ -33,36 +38,36 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
                     <legend>Nueva orden de pago</legend>
 
                     <div className="form-group">
-                        <label htmlFor="nombres">Nombres y apellidos</label>
+                        <label htmlFor="customer_name">Nombres y apellidos</label>
                         <input type="text"
                                className="form-control"
-                               name="nombres"
+                               name="customer_name"
                                maxLength='80'
-                               defaultValue={formData.nombres}
+                               defaultValue={formData.customer_name}
                                placeholder="Ejemplo: Juan Perez" required/>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Correo electrónico</label>
+                        <label htmlFor="customer_email">Correo electrónico</label>
                         <input type="email"
                                className="form-control"
-                               name="email"
+                               name="customer_email"
                                maxLength='120'
-                               defaultValue={formData.email}
+                               defaultValue={formData.customer_email}
                                placeholder="Ejemplo: juan23perez@gmail.com" required/>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="telefono">Número telefónico</label>
+                        <label htmlFor="customer_mobile">Número telefónico</label>
                         <input type="text"
                                className="form-control"
-                               name="telefono"
+                               name="customer_mobile"
                                maxLength='40'
-                               defaultValue={formData.telefono}
+                               defaultValue={formData.customer_mobile}
                                placeholder="Escribe aquí tu numero de teléfono o celular" required/>
                     </div>
 
-                    <button type="submit" className="btn btn-primary">Continuar</button>
+                    <button type="submit" className="btn btn-primary" disabled={btns.disabled}>{btns.name}</button>
                 </fieldset>
             </form>
         </>
@@ -75,11 +80,11 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
  * @param setVista
  * @param setInfoPago
  */
-function respuestaConsultaOrden(datos, setVista, setInfoPago){
-    if ((datos?.status)) {
+function respuestaConsultaOrden(datos, setVista, setInfoPago) {
+    if ((datos)) {
         Swal.fire({
             title: 'Ya existe un pago en proceso con los datos ingresados',
-            html:'¿Que desea hacer?',
+            html: '¿Que desea hacer?',
             showCancelButton: true,
             confirmButtonText: `Ver estado del pago`,
             cancelButtonText: `Regresar`,

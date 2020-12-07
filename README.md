@@ -20,13 +20,15 @@
 
 4. Copiar el archivo `.env.example` incluido en uno de nombre `.env` y completar variables de pasarela de pagos
 
-4. crear un archivo vacio en la ruta database `database/database.sqlite` 
+5. crear un archivo vacio en la ruta database `database/database.sqlite` 
 
-4. ejecutar comando `php artisan migrate:fresh --seed` 
+6. ejecutar comando `php artisan migrate:fresh --seed` 
 
-6. Ejecutar pruebas `vendor/bin/phpunit`
+7. Ejecutar pruebas `php artisan test`
 
-8. Acceder al sitio.
+8. Añadir al crontab: `* * * * * php /raiz-del-proyecto/artisan schedule:run >> /dev/null 2>&1`
+
+9. Acceder al sitio.
 
 ## Credeniales del dueño de la tienda. 🔑
 
