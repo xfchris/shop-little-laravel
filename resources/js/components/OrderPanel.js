@@ -8,9 +8,9 @@ import OrderEstado from "./OrderEstado";
 export default function OrderPanel() {
 
     const producto = getProducto();
-    const [infoPago, setInfoPago] = useState({})
+    const [infoPago, setInfoPago] = useState(initialInfoPago)
     const [formData, setFormData] = useState(initialFDState)
-    const [vista, setVista] = useState('OrderForm')
+    const [vista, setVista] = useState(initialVista)
 
 
     return (
@@ -38,17 +38,30 @@ export default function OrderPanel() {
     );
 }
 
+function initialInfoPago(){
+    let orden = document.querySelector('#orderPanel').getAttribute('data-orden')
+    if (orden){
+        return JSON.parse(orden)
+    }
+    return {}
+}
+
 /**
  * Retorna un objeto inicial para el usuario
- *
- * @returns {{customer_mobile: string, customer_email: string, customer_name: string}}
  */
 function initialFDState() {
-    return {
-        customer_name: "Juan Perez",
-        customer_email: "juan_perez@hotmail.com",
-        customer_mobile: "3334445999"
+    let orden = document.querySelector('#orderPanel').getAttribute('data-orden')
+    if (orden){
+        return JSON.parse(orden)
     }
+    return {}
+}
+
+/**
+ * Retorna el panel inicial
+ */
+function initialVista(){
+    return document.querySelector('#orderPanel').getAttribute('data-vista')
 }
 
 /**

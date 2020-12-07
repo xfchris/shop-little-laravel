@@ -71267,14 +71267,14 @@ function OrderEstado(_ref) {
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     className: "mb-4"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("legend", null, "Estado de su orden"), "Su orden se encuentra en estado: ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, infoPago === null || infoPago === void 0 ? void 0 : infoPago.status)), infoPago !== null && infoPago !== void 0 && infoPago.url ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Si no se abri\xF3 la nueva pesta\xF1a, haz click abajo para continuar el pago ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("legend", null, "Estado de su orden"), "Su orden se encuentra en estado: ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("b", null, infoPago === null || infoPago === void 0 ? void 0 : infoPago.status)), infoPago !== null && infoPago !== void 0 && infoPago.status && infoPago.status === 'Rechazado' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    onClick: mostrarForm,
+    className: "btn btn-info"
+  }, "Reintentar pago") : infoPago !== null && infoPago !== void 0 && infoPago.url && infoPago.status !== 'Pagado' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, "Si no se abri\xF3 la nueva pesta\xF1a, haz click abajo para continuar el pago ", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("br", null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("a", {
     href: infoPago.url,
     target: "_blank",
     className: "btn btn-info"
-  }, "Continuar pago")) : infoPago !== null && infoPago !== void 0 && infoPago.status && infoPago.status == 'REJECTED' ? /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
-    onClick: mostrarForm,
-    className: "btn btn-info"
-  }, "Reintentar pago") : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null));
+  }, "Continuar pago")) : /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", null, " "));
 }
 
 /***/ }),
@@ -71308,6 +71308,18 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 
 
@@ -71316,6 +71328,14 @@ function OrderForm(_ref) {
       setFormData = _ref.setFormData,
       setVista = _ref.setVista,
       setInfoPago = _ref.setInfoPago;
+
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])({
+    name: 'Continuar',
+    disabled: ''
+  }),
+      _useState2 = _slicedToArray(_useState, 2),
+      btns = _useState2[0],
+      setBtns = _useState2[1];
 
   var onChange = function onChange(e) {
     setFormData(_objectSpread(_objectSpread({}, formData), {}, _defineProperty({}, e.target.name, e.target.value)));
@@ -71332,30 +71352,42 @@ function OrderForm(_ref) {
               e.target.checkValidity();
               e.preventDefault();
               _context.prev = 2;
-              _context.next = 5;
+              setBtns({
+                name: 'Espere...',
+                disabled: 'disabled'
+              });
+              _context.next = 6;
               return Object(_api_Orden__WEBPACK_IMPORTED_MODULE_3__["buscarOrden"])(formData);
 
-            case 5:
+            case 6:
               res = _context.sent;
+              setBtns({
+                name: 'Continuar',
+                disabled: ''
+              });
               respuestaConsultaOrden((_res$data = res.data) === null || _res$data === void 0 ? void 0 : _res$data.data, setVista, setInfoPago);
-              _context.next = 13;
+              _context.next = 16;
               break;
 
-            case 9:
-              _context.prev = 9;
+            case 11:
+              _context.prev = 11;
               _context.t0 = _context["catch"](2);
+              setBtns({
+                name: 'Espere...',
+                disabled: 'disabled'
+              });
               msg = _context.t0 === null || _context.t0 === void 0 ? void 0 : (_error$response = _context.t0.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : _error$response$data.msg;
 
               if (msg) {
                 sweetalert2__WEBPACK_IMPORTED_MODULE_2___default.a.fire(msg);
               }
 
-            case 13:
+            case 16:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[2, 9]]);
+      }, _callee, null, [[2, 11]]);
     }));
 
     return function onSubmit(_x) {
@@ -71405,8 +71437,9 @@ function OrderForm(_ref) {
     required: true
   })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
     type: "submit",
-    className: "btn btn-primary"
-  }, "Continuar"))));
+    className: "btn btn-primary",
+    disabled: btns.disabled
+  }, btns.name))));
 }
 /**
  * Si no existe una orden creada con datos similares, muestra estado para continuar con el pago
@@ -71518,7 +71551,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 function OrderPanel() {
   var producto = getProducto();
 
-  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({}),
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(initialInfoPago),
       _useState2 = _slicedToArray(_useState, 2),
       infoPago = _useState2[0],
       setInfoPago = _useState2[1];
@@ -71528,7 +71561,7 @@ function OrderPanel() {
       formData = _useState4[0],
       setFormData = _useState4[1];
 
-  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])('OrderForm'),
+  var _useState5 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(initialVista),
       _useState6 = _slicedToArray(_useState5, 2),
       vista = _useState6[0],
       setVista = _useState6[1];
@@ -71566,18 +71599,37 @@ function OrderPanel() {
     })
   }[vista])))));
 }
+
+function initialInfoPago() {
+  var orden = document.querySelector('#orderPanel').getAttribute('data-orden');
+
+  if (orden) {
+    return JSON.parse(orden);
+  }
+
+  return {};
+}
 /**
  * Retorna un objeto inicial para el usuario
- *
- * @returns {{customer_mobile: string, customer_email: string, customer_name: string}}
  */
 
+
 function initialFDState() {
-  return {
-    customer_name: "Juan Perez",
-    customer_email: "juan_perez@hotmail.com",
-    customer_mobile: "3334445999"
-  };
+  var orden = document.querySelector('#orderPanel').getAttribute('data-orden');
+
+  if (orden) {
+    return JSON.parse(orden);
+  }
+
+  return {};
+}
+/**
+ * Retorna el panel inicial
+ */
+
+
+function initialVista() {
+  return document.querySelector('#orderPanel').getAttribute('data-vista');
 }
 /**
  * Obtengo el producto desde el backend
@@ -71617,6 +71669,18 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 
 
@@ -71624,6 +71688,14 @@ function OrderPreview(_ref) {
   var formData = _ref.formData,
       setVista = _ref.setVista,
       setInfoPago = _ref.setInfoPago;
+
+  var _useState = Object(react__WEBPACK_IMPORTED_MODULE_1__["useState"])({
+    name: 'Realizar pago',
+    disabled: ''
+  }),
+      _useState2 = _slicedToArray(_useState, 2),
+      btns = _useState2[0],
+      setBtns = _useState2[1];
 
   var modificiarData = function modificiarData() {
     setVista('OrderForm');
@@ -71638,11 +71710,20 @@ function OrderPreview(_ref) {
           switch (_context.prev = _context.next) {
             case 0:
               _context.prev = 0;
-              _context.next = 3;
+              setBtns({
+                name: 'Espere...',
+                disabled: 'disabled'
+              }); //inicio el pago y obtiene url de redireccion
+
+              _context.next = 4;
               return Object(_api_Orden__WEBPACK_IMPORTED_MODULE_2__["realizarPago"])(formData);
 
-            case 3:
+            case 4:
               res = _context.sent;
+              setBtns({
+                name: 'Realizar pago',
+                disabled: ''
+              });
 
               if ((_res$data = res.data) !== null && _res$data !== void 0 && (_res$data$data = _res$data.data) !== null && _res$data$data !== void 0 && _res$data$data.url) {
                 //muestra estado de solicitud
@@ -71655,24 +71736,28 @@ function OrderPreview(_ref) {
                 abrirLink(res.data.data.url, '_blank');
               }
 
-              _context.next = 11;
+              _context.next = 14;
               break;
 
-            case 7:
-              _context.prev = 7;
+            case 9:
+              _context.prev = 9;
               _context.t0 = _context["catch"](0);
+              setBtns({
+                name: 'Realizar pago',
+                disabled: 'disabled'
+              });
               msg = _context.t0 === null || _context.t0 === void 0 ? void 0 : (_error$response = _context.t0.response) === null || _error$response === void 0 ? void 0 : (_error$response$data = _error$response.data) === null || _error$response$data === void 0 ? void 0 : (_error$response$data$ = _error$response$data.errors) === null || _error$response$data$ === void 0 ? void 0 : _error$response$data$.msg;
 
               if (msg) {
                 sweetalert2__WEBPACK_IMPORTED_MODULE_3___default.a.fire(msg);
               }
 
-            case 11:
+            case 14:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[0, 7]]);
+      }, _callee, null, [[0, 9]]);
     }));
 
     return function pagar() {
@@ -71702,8 +71787,9 @@ function OrderPreview(_ref) {
     className: "mt-4"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
     onClick: pagar,
-    className: "btn btn-success mr-3"
-  }, "Realizar pago"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
+    className: "btn btn-success mr-3",
+    disabled: btns.disabled
+  }, btns.name), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("button", {
     onClick: modificiarData,
     className: "btn btn-info"
   }, "Modificar informaci\xF3n")));

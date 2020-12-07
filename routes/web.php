@@ -16,7 +16,7 @@ Auth::routes([
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('index');
 Route::get('/ordenes', [App\Http\Controllers\OrderController::class, 'listarOrdenes'])->middleware('auth')->name('home');
-#Route::get('/orden/{id}', [App\Http\Controllers\OrderController::class, 'mostrarOrden'])->name('mostrarOrden');
+Route::get('/orden/{id}', [App\Http\Controllers\OrderController::class, 'mostrarOrden'])->name('mostrarOrden');
 Route::post('/json/buscar-orden', [App\Http\Controllers\OrderController::class, 'buscarOrden'])->name('buscarOrden');
 Route::post('/json/iniciar-pago', [App\Http\Controllers\OrderController::class, 'iniciarPago'])->name('iniciarPago');
 

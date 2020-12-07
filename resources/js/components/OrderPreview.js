@@ -1,8 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import {realizarPago} from "../api/Orden";
 import Swal from "sweetalert2";
 
 export default function OrderPreview({formData, setVista, setInfoPago}) {
+
+    const [btns, setBtns] = useState({name: 'Realizar pago', disabled: ''})
 
     const modificiarData = () => {
         setVista('OrderForm')
@@ -10,21 +12,24 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
 
     const pagar = async () => {
         try {
+            setBtns({name: 'Espere...', disabled: 'disabled'})
             //inicio el pago y obtiene url de redireccion
             let res = await realizarPago(formData)
-            if (res.data?.data?.url){
+            setBtns({name: 'Realizar pago', disabled: ''})
+            if (res.data?.data?.url) {
                 //muestra estado de solicitud
                 setInfoPago({
-                    'status':'Creada',
-                    'url':res.data.data.url
+                    'status': 'Creada',
+                    'url': res.data.data.url
                 })
                 setVista('OrderEstado')
                 //redirecciona a placetopay
                 abrirLink(res.data.data.url, '_blank')
             }
         } catch (error) {
+            setBtns({name: 'Realizar pago', disabled: 'disabled'})
             let msg = error?.response?.data?.errors?.msg
-            if (msg){
+            if (msg) {
                 Swal.fire(msg)
             }
         }
@@ -47,7 +52,7 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
             </div>
 
             <div className="mt-4">
-                <button onClick={pagar} className="btn btn-success mr-3">Realizar pago</button>
+                <button onClick={pagar} className="btn btn-success mr-3" disabled={btns.disabled}>{btns.name}</button>
                 <button onClick={modificiarData} className="btn btn-info">Modificar información</button>
             </div>
         </>
@@ -60,7 +65,7 @@ export default function OrderPreview({formData, setVista, setInfoPago}) {
  * @param url
  * @param target
  */
-function abrirLink(url, target){
+function abrirLink(url, target) {
     const link = document.querySelector('#linkOculto')
     link.href = url
     link.click()

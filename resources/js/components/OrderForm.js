@@ -1,8 +1,10 @@
-import React from 'react'
+import React, {useState} from 'react'
 import Swal from 'sweetalert2'
 import {buscarOrden} from "../api/Orden";
 
 export default function OrderForm({formData, setFormData, setVista, setInfoPago}) {
+
+    const [btns, setBtns] = useState({name: 'Continuar', disabled: ''})
 
     const onChange = (e) => {
         setFormData({
@@ -15,12 +17,15 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
         e.target.checkValidity();
         e.preventDefault();
 
-        try{
-            let res =  await buscarOrden(formData)
+        try {
+            setBtns({name: 'Espere...', disabled: 'disabled'})
+            let res = await buscarOrden(formData)
+            setBtns({name: 'Continuar', disabled: ''})
             respuestaConsultaOrden(res.data?.data, setVista, setInfoPago)
-        }catch(error) {
+        } catch (error) {
+            setBtns({name: 'Espere...', disabled: 'disabled'})
             let msg = error?.response?.data?.msg
-            if (msg){
+            if (msg) {
                 Swal.fire(msg)
             }
         }
@@ -62,7 +67,7 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
                                placeholder="Escribe aquí tu numero de teléfono o celular" required/>
                     </div>
 
-                    <button type="submit" className="btn btn-primary">Continuar</button>
+                    <button type="submit" className="btn btn-primary" disabled={btns.disabled}>{btns.name}</button>
                 </fieldset>
             </form>
         </>
@@ -75,11 +80,11 @@ export default function OrderForm({formData, setFormData, setVista, setInfoPago}
  * @param setVista
  * @param setInfoPago
  */
-function respuestaConsultaOrden(datos, setVista, setInfoPago){
+function respuestaConsultaOrden(datos, setVista, setInfoPago) {
     if ((datos)) {
         Swal.fire({
             title: 'Ya existe un pago en proceso con los datos ingresados',
-            html:'¿Que desea hacer?',
+            html: '¿Que desea hacer?',
             showCancelButton: true,
             confirmButtonText: `Ver estado del pago`,
             cancelButtonText: `Regresar`,
