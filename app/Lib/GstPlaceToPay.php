@@ -32,7 +32,7 @@ class GstPlaceToPay
                     'total' => $producto['precio'],
                 ],
             ],
-            'expiration' => date('c', strtotime('+2 days')),
+            'expiration' => date('c', strtotime('+'.config('constants.dias_expiracion').' days')),
             'returnUrl' => route('aceptarPago', ['id'=>$reference]),
             'cancelUrl' => route('cancelarPago', ['id'=>$reference]),
             'ipAddress' => request()->ip(),

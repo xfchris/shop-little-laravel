@@ -28,7 +28,7 @@ export default function OrderInfoProducto({producto}) {
                 <p title={producto.descripcion} id="descripcion">
                     {producto.descripcion}
                 </p>
-                <b>Precio: $ {producto.precio.toLocaleString()} (USD)</b>
+                <b>Precio: $ {producto.precio.toLocaleString()} ({producto.moneda})</b>
             </div>
 
         </SassProducto>
