@@ -14,14 +14,14 @@ class ActualizarEVencidos extends Command
      *
      * @var string
      */
-    protected $signature = 'command:name';
+    protected $signature = 'orders:vencidos';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Actualiza las ordenes que ya se vencieron';
 
     /**
      * Create a new command instance.

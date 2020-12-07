@@ -20,7 +20,7 @@ class Order extends Model
     public function getStatusAttribute()
     {
        $estado = $this->attributes['status'];
-       $res = Config::get('constants.status.'.$estado);
+       $res = config('constants.status.'.$estado);
         return $res?:$estado;
     }
 

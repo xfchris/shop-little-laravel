@@ -14,14 +14,15 @@ class ActualizarEPendientes extends Command
      *
      * @var string
      */
-    protected $signature = 'orders:u_pendientes';
+    protected $signature = 'orders:pendientes';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Actualiza las ordenes que quedaron en estado pendiente por algun error'.
+    'de comunicacion con el webservice de placetopay';
 
     /**
      * Create a new command instance.
@@ -45,7 +46,7 @@ class ActualizarEPendientes extends Command
         foreach ($ordenes as $orden) {
             //realizo una consulta en ptp
             $estado = $gstPlaceToPay->getStatusPago($orden->payment->request_id);
-            if ($orden->status != Config('constants.status.' . $estado->status())) {
+            if ($orden->status != config('constants.status.' . $estado->status())) {
                 $orden->status = ($estado->status() != 'APPROVED') ?: 'PAYED';
                 $orden->save();
                 $estadosActualizados[] = $orden->id;

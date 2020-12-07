@@ -70,7 +70,7 @@ class OrderController extends Controller
 
             $data['status'] = 'CREATED';
             if ($order->store($data)) {
-                $resPTP = $gstPlaceToPay->pagar($order, Config('constants.producto'));
+                $resPTP = $gstPlaceToPay->pagar($order, config('constants.producto'));
                 //guardo sesion y la url de pago
                 if ($order->guardarSesion($order->id, [$resPTP->requestId, $resPTP->processUrl])) {
                     $res = ['url' => $resPTP->processUrl];
@@ -99,7 +99,7 @@ class OrderController extends Controller
             //busco la orden
             $order = Order::find(explode('_', $id)[0]);
             //si no esta en etado pagada, la busco en ptp
-            if ($order->status != Config('constants.status.PAYED')) {
+            if ($order->status != config('constants.status.PAYED')) {
                 $estado = $gstPlaceToPay->getStatusPago($order->payment->request_id);
                 $order->status = $estado->status();
                 //si su estado esta aprobada, la apruebo en base de datos
@@ -136,13 +136,25 @@ class OrderController extends Controller
         foreach ($ordenes as $orden) {
             //realizo una consulta en ptp
             $estado = $gstPlaceToPay->getStatusPago($orden->payment->request_id);
-            if ($orden->status != Config('constants.status.' . $estado->status())) {
+            if ($orden->status != config('constants.status.' . $estado->status())) {
                 $orden->status = ($estado->status() != 'APPROVED') ?: 'PAYED';
                 $orden->save();
                 $estadosActualizados[] = $orden->id;
             }
         }
         return $estadosActualizados;
+    }
+
+    /**
+     * Muestra una orden en pantalla
+     *
+     * @param $id
+     */
+    public function mostrarOrden($id){
+        $orden = Order::select('id','customer_name','customer_email','customer_mobile','status')->findOrFail($id);
+        $orden->url = $orden->payment()->select('process_url')->first()->process_url;
+        $producto = config('constants.producto');
+        return view('orden', compact('orden', 'producto'));
     }
 
     /**
@@ -157,7 +169,7 @@ class OrderController extends Controller
             //busco la orden
             $order = Order::find(explode('_', $id)[0]);
             //si esta en estado de creacion, la busco en ptp
-            if ($order->status == Config('constants.status.CREATED')) {
+            if ($order->status == config('constants.status.CREATED')) {
                 $estado = $gstPlaceToPay->getStatusPago($order->payment->request_id);
                 //si esta en estado rechazado, rechazar pago
                 if ($estado->isRejected()) {
