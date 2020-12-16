@@ -128,7 +128,7 @@ class OrderControllerTest extends TestCase
         $res = $this->ordenController->aceptarPago($this->gstPlaceToPay, $payment->order_id);
 
         //compruebo que haya cambiado en base de datos el estado del pago
-        $this->assertSame($payment->order->status, config('constants.status.PAYED'));
+        $this->assertSame($payment->order->status, 'PAYED');
         //compruebo que redirecciona
         $this->assertSame($res->status(), 302);
     }
@@ -150,7 +150,7 @@ class OrderControllerTest extends TestCase
         $res = $this->ordenController->cancelarPago($this->gstPlaceToPay, $payment->order_id);
 
         //compruebo que haya cambiado en base de datos el estado del pago
-        $this->assertSame($payment->order->status, config('constants.status.REJECTED'));
+        $this->assertSame($payment->order->status, 'REJECTED');
         //compruebo que redirecciona
         $this->assertSame($res->status(), 302);
     }
