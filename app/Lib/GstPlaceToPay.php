@@ -15,6 +15,7 @@ class GstPlaceToPay
 
     /**
      * Inicia el pago y devuelve la url en donde el cliente debe realizar el pago
+     *
      * @param $order
      * @param $producto
      * @return mixed
