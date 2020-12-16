@@ -43,8 +43,8 @@ class ActualizarEPendientes extends Command
     {
         $ordenes = Order::where('status', 'PENDING')->get();
         $estadosActualizados = '';
-        $cases = '';
-        $param1 = [];
+        $casos = '';
+        $parametros = [];
 
         foreach ($ordenes as $orden) {
             //realizo una consulta en ptp
@@ -52,16 +52,16 @@ class ActualizarEPendientes extends Command
             $estado = ($estado != 'APPROVED') ?: 'PAYED';
 
             if ($orden->status != $estado) {
-                $cases .= "WHEN {$orden->id} then ? ";
-                $param1[] = $estado;
+                $casos .= "WHEN {$orden->id} then ? ";
+                $parametros[] = $estado;
                 $estadosActualizados .= $orden->id . ',';
             }
         }
         if ($estadosActualizados) {
             $estadosActualizados = trim($estadosActualizados, ',');
 
-            $res = \DB::update("UPDATE `{$ordenes[0]->getTable()}` SET `status` = CASE `id` {$cases} END
-            WHERE `id` in (" . $estadosActualizados . ")", $param1);
+            $res = \DB::update("UPDATE `{$ordenes[0]->getTable()}` SET `status` = CASE `id` {$casos} END
+            WHERE `id` in (" . $estadosActualizados . ")", $parametros);
 
             if ($res) {
                 Log::info('Id de ordenes actualizadas: ' . $estadosActualizados);
