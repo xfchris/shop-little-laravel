@@ -12,18 +12,6 @@ class Order extends Model
 
     protected $guarded = ['id'];
 
-    /**
-     * Devuelve el estado en lenguaje humano
-     *
-     * @return mixed
-    */
-    public function getStatusAttribute()
-    {
-       $estado = $this->attributes['status'];
-       $res = config('constants.status.'.$estado);
-        return $res?:$estado;
-    }
-
     public function store($data){
         return $this->fill($data)->save();
     }

@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\Log;
 
 class Helpers
 {
+    private static  $estados = null;
+
+    public static function getEstadoPago($codigo=null){
+        if (!self::$estados){
+            self::$estados = config('constants.status');
+        }
+        return self::$estados[$codigo];
+    }
     /**
      * Devuelve la fecha en formato local
      *

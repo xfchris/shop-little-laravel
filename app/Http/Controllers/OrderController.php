@@ -25,7 +25,9 @@ class OrderController extends Controller
     /**
      * API: Busca una orden con los datos del formulario
      *
-     * @param Request $request
+     * @param OrdenRequest $request
+     * @param Order $order
+     * @param GstPlaceToPay $gstPlaceToPay
      * @return \Illuminate\Http\JsonResponse
      */
     public function buscarOrden(OrdenRequest $request, Order $order, GstPlaceToPay $gstPlaceToPay)
@@ -55,7 +57,7 @@ class OrderController extends Controller
      * API: Guarda la orden e inicia el pago en la pasarela
      *
      * @param Request $request
-     * @param Order $order
+     * @param OrdenRequest $order
      * @return \Illuminate\Http\JsonResponse
      */
     public function iniciarPago(OrdenRequest $request, Order $order, GstPlaceToPay $gstPlaceToPay)
@@ -89,17 +91,18 @@ class OrderController extends Controller
      * Realiza una consulta en placetopay y aprueba el pago de la orden
      *
      * @param GstPlaceToPay $gstPlaceToPay
-     * @param $id
+     * @param int $id
      * @throws \Exception
      */
-    public function aceptarPago(GstPlaceToPay $gstPlaceToPay, $id)
+    public function aceptarPago(GstPlaceToPay $gstPlaceToPay, int $id)
     {
         $res = redirect('/');
         try {
             //busco la orden
-            $order = Order::find(explode('_', $id)[0]);
+            $order = Order::find($id);
+
             //si no esta en etado pagada, la busco en ptp
-            if ($order->status != config('constants.status.PAYED')) {
+            if ($order->status != 'PAYED') {
                 $estado = $gstPlaceToPay->getStatusPago($order->payment->request_id);
                 $order->status = $estado->status();
                 //si su estado esta aprobada, la apruebo en base de datos
@@ -120,39 +123,14 @@ class OrderController extends Controller
     }
 
     /**
-     * Metodo que actualiza pagos que quedaron pendiente
-     * Nota: se puede optimizar añadiendo la consulta a unas variables y ejecutarlas
-     * todas en un solo query.
-     *
-     * @param GstPlaceToPay $gstPlaceToPay
-     * @throws \Exception
-     */
-    public function actualizarPagosPendientes(GstPlaceToPay $gstPlaceToPay)
-    {
-        //obtengo pagos en estado pendiente y/o vencidos
-        $ordenes = Order::where('status', 'PENDING')->get();
-
-        $estadosActualizados = [];
-        foreach ($ordenes as $orden) {
-            //realizo una consulta en ptp
-            $estado = $gstPlaceToPay->getStatusPago($orden->payment->request_id);
-            if ($orden->status != config('constants.status.' . $estado->status())) {
-                $orden->status = ($estado->status() != 'APPROVED') ?: 'PAYED';
-                $orden->save();
-                $estadosActualizados[] = $orden->id;
-            }
-        }
-        return $estadosActualizados;
-    }
-
-    /**
      * Muestra una orden en pantalla
      *
      * @param $id
      */
-    public function mostrarOrden($id){
+    public function mostrarOrden(int $id){
         $orden = Order::select('id','customer_name','customer_email','customer_mobile','status')->findOrFail($id);
         $orden->url = $orden->payment()->select('process_url')->first()->process_url;
+        $orden->status = Helpers::getEstadoPago($orden->status);
         $producto = config('constants.producto');
         return view('orden', compact('orden', 'producto'));
     }
@@ -161,15 +139,15 @@ class OrderController extends Controller
      * Realiza una consulta en placetopay y rechaza el pago de la orden
      *
      * @param GstPlaceToPay $gstPlaceToPay
-     * @param $id
+     * @param int $id
      */
-    public function cancelarPago(GstPlaceToPay $gstPlaceToPay, $id)
+    public function cancelarPago(GstPlaceToPay $gstPlaceToPay, int $id)
     {
         try {
             //busco la orden
-            $order = Order::find(explode('_', $id)[0]);
+            $order = Order::find($id);
             //si esta en estado de creacion, la busco en ptp
-            if ($order->status == config('constants.status.CREATED')) {
+            if ($order->status == 'CREATED') {
                 $estado = $gstPlaceToPay->getStatusPago($order->payment->request_id);
                 //si esta en estado rechazado, rechazar pago
                 if ($estado->isRejected()) {

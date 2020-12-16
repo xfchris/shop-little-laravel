@@ -26,7 +26,7 @@
                                 <td><a href="{{route('mostrarOrden',[$orden->id])}}">{{$orden->customer_name}}</a></td>
                                 <td>{{$orden->customer_email}}</td>
                                 <td>{{$orden->customer_mobile}}</td>
-                                <td>{{$orden->status}}</td>
+                                <td>{{ App\Lib\Helpers::getEstadoPago($orden->status) }}</td>
                                 <td>{{App\Lib\Helpers::dateFormat($orden->updated_at)}}</td>
                             </tr>
                         @empty
